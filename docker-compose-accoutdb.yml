@@ -1,0 +1,17 @@
+version: '3'
+services:
+  account-mongodb:
+    environment:
+      - INIT_DUMP=account-service-dump.js   
+      - MONGODB_PASSWORD=$MONGODB_PASSWORD 
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+
+    image: sqshq/piggymetrics-mongodb
+    ports:
+      - "27017:27017"   
+    restart: always
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "10"
