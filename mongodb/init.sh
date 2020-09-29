@@ -4,6 +4,10 @@ if test -z "$MONGODB_PASSWORD"; then
     exit 1
 fi
 
+ echo "MONGODB_PASSWORD=" +$MONGODB_PASSWORD;
+ echo "GREG_TEST_01="+$GREG_TEST_01;
+ 
+
 auth="-u user -p $MONGODB_PASSWORD"
 
 # MONGODB USER CREATION

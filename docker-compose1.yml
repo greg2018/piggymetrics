@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 services:
   rabbitmq:
     image: rabbitmq:3-management
@@ -49,15 +49,6 @@ services:
         max-size: "10m"
         max-file: "10"
  
-  auth-mongodb:
-    environment:
-      MONGODB_PASSWORD: $MONGODB_PASSWORD
-    image: sqshq/piggymetrics-mongodb
-    restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "10"
 
   auth-service:
     environment:
@@ -71,22 +62,24 @@ services:
     depends_on:
       - config
       - registry
-      - auth-mongodb
+      - account-mongodb
     logging:
       options:
         max-size: "10m"
         max-file: "10"
 
   account-mongodb:
-    environment:
-      INIT_DUMP: account-service-dump.js
-      MONGODB_PASSWORD: $MONGODB_PASSWORD
-    image: sqshq/piggymetrics-mongodb
+    image: mongo:4.0
+    container_name: account-mongodb
     restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "10"
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: admin
+        MONGO_INITDB_ROOT_PASSWORD: 123456
+        MONGO_INITDB_DATABASE: admin
+    ports:
+        - 27017:27017
+    volumes:
+        - ./piggymetrics-mongo-init.js:/docker-entrypoint-initdb.d/piggymetrics-mongo-init.js:ro
 
   account-service:
     environment:

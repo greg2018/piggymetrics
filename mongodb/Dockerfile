@@ -1,4 +1,4 @@
-FROM mongo:3
+FROM mongo:4
 MAINTAINER Alexander Lukyanchikov <sqshq@sqshq.com>
 
 ADD init.sh /init.sh
@@ -13,3 +13,5 @@ RUN \
  dos2unix -n /init.sh /initx.sh && chmod +x /initx.sh
 
 ENTRYPOINT ["/initx.sh"]
+EXPOSE 27017
+EXPOSE 28017
