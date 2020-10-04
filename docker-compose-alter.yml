@@ -1,9 +1,10 @@
-version: '2.1'
+version: '3.7'
 services:
   rabbitmq:
     image: rabbitmq:3-management
     restart: always
     ports:
+      - 5672:5672
       - 15672:15672
     logging:
       options:
@@ -26,8 +27,7 @@ services:
     image: sqshq/piggymetrics-registry
     restart: always
     depends_on:
-      config:
-        condition: service_healthy
+      - config
     ports:
       - 8761:8761
     logging:
@@ -41,8 +41,8 @@ services:
     image: sqshq/piggymetrics-gateway
     restart: always
     depends_on:
-      config:
-        condition: service_healthy
+      - config
+      - registry
     ports:
       - 80:4000
     logging:
@@ -60,22 +60,15 @@ services:
     image: sqshq/piggymetrics-auth-service
     restart: always
     depends_on:
-      config:
-        condition: service_healthy
+      - config
+      - account-mongodb
+      - registry
     logging:
       options:
         max-size: "10m"
         max-file: "10"
 
-  auth-mongodb:
-    environment:
-      MONGODB_PASSWORD: $MONGODB_PASSWORD
-    image: sqshq/piggymetrics-mongodb
-    restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "10"
+ 
 
   account-service:
     environment:
@@ -85,23 +78,27 @@ services:
     image: sqshq/piggymetrics-account-service
     restart: always
     depends_on:
-      config:
-        condition: service_healthy
+      - config
+      - account-mongodb
+      - registry
     logging:
       options:
         max-size: "10m"
         max-file: "10"
 
   account-mongodb:
-    environment:
-      INIT_DUMP: account-service-dump.js
-      MONGODB_PASSWORD: $MONGODB_PASSWORD
-    image: sqshq/piggymetrics-mongodb
+    image: mongo:4.0
+    container_name: account-mongodb
     restart: always
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "10"
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: admin
+        MONGO_INITDB_ROOT_PASSWORD: 123456
+        MONGO_INITDB_DATABASE: admin
+    ports:
+        - 27017:27017
+    volumes:
+        - ./piggymetrics-mongo-init.js:/docker-entrypoint-initdb.d/piggymetrics-mongo-init.js:ro
+
 
   statistics-service:
     environment:
@@ -111,18 +108,11 @@ services:
     image: sqshq/piggymetrics-statistics-service
     restart: always
     depends_on:
-      config:
-        condition: service_healthy
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "10"
-
-  statistics-mongodb:
-    environment:
-      MONGODB_PASSWORD: $MONGODB_PASSWORD
-    image: sqshq/piggymetrics-mongodb
-    restart: always
+      - config
+      - account-mongodb
+      - registry
+    ports:
+      - 7000:7000
     logging:
       options:
         max-size: "10m"
@@ -136,18 +126,11 @@ services:
     image: sqshq/piggymetrics-notification-service
     restart: always
     depends_on:
-      config:
-        condition: service_healthy
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "10"
-
-  notification-mongodb:
-    image: sqshq/piggymetrics-mongodb
-    restart: always
-    environment:
-      MONGODB_PASSWORD: $MONGODB_PASSWORD
+      - config
+      - account-mongodb
+      - registry
+    ports:
+      - 8000:8000
     logging:
       options:
         max-size: "10m"
@@ -159,8 +142,9 @@ services:
     image: sqshq/piggymetrics-monitoring
     restart: always
     depends_on:
-      config:
-        condition: service_healthy
+      - config
+      - account-mongodb
+      - registry
     ports:
       - 8080:8080
     logging:
@@ -174,8 +158,9 @@ services:
     image: sqshq/piggymetrics-turbine-stream-service
     restart: always
     depends_on:
-      config:
-        condition: service_healthy
+      - config
+      - account-mongodb
+      - registry
     ports:
     - 8989:8989
     logging:

@@ -1,0 +1,21 @@
+#01) Modify files let all services which need mongodb point to account-mongodb 
+	config/src/main/resources/shared/auth-service.yml
+    config/src/main/resources/shared/notification-service.yml
+    config/src/main/resources/shared/statistics-service.yml
+#02) Upgrade docker-compose-alter.yml and  docker-compose.dev-alter.yml to V 3.7
+
+#03) Remove all other mongo db services except account-mongodb in docker-compose-alter.ymland docker-compose.dev-alter.yml
+
+#04) mvn install -DskipTests
+
+#05)  docker-compose -f docker-compose-alter.yml -f docker-compose.dev-alter.yml up
+
+#06) GUI URL (in gateway)
+	http://localhost:80
+	http://localhost
+
+#07) hystrix dashboard
+http://localhost:8080/hystrix
+
+#08) turbine.stream
+http://turbine-stream-service:8989/turbine/turbine.stream
